@@ -4,6 +4,8 @@ const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const eslintPluginImport = require('eslint-plugin-import');
 const airbnbBase = require('eslint-config-airbnb-base');
+const betterTailwindcss = require('eslint-plugin-better-tailwindcss');
+const simpleImportSort = require('eslint-plugin-simple-import-sort');
 
 module.exports = defineConfig([
   {
@@ -15,6 +17,8 @@ module.exports = defineConfig([
     },
     plugins: {
       import: eslintPluginImport,
+      'better-tailwindcss': betterTailwindcss,
+      'simple-import-sort': simpleImportSort,
     },
     extends: [
       eslint.configs.recommended,
@@ -25,6 +29,14 @@ module.exports = defineConfig([
     processor: angular.processInlineTemplates,
     rules: {
       ...airbnbBase.rules,
+
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
+      'import/first': 'error',
+      'import/no-duplicates': 'error',
+
+      'better-tailwindcss/no-unknown-classes': 'error',
+      'better-tailwindcss/enforce-consistent-class-order': 'error',
 
       'max-lines-per-function': ['error', { max: 40, skipBlankLines: true, skipComments: true }],
 
@@ -43,7 +55,7 @@ module.exports = defineConfig([
       'no-restricted-syntax': [
         'error',
         {
-          selector: 'VariableDeclarator[init.type="Literal"] > Literal[value=/^[A-Za-z]{2,}$/]',
+          selector: String.raw`VariableDeclarator[init.type="Literal"] > Literal[value=/\^[A-Za-z]{2,}\$/]`,
           message:
             'Avoid magic strings. Declare string literals as descriptive global or class constants.',
         },
@@ -83,7 +95,13 @@ module.exports = defineConfig([
   },
   {
     files: ['**/*.html'],
+    plugins: {
+      'better-tailwindcss': betterTailwindcss,
+    },
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
-    rules: {},
+    rules: {
+      'better-tailwindcss/no-unknown-classes': 'error',
+      'better-tailwindcss/enforce-consistent-class-order': 'error',
+    },
   },
 ]);
