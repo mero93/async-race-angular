@@ -1,6 +1,12 @@
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+  HttpResponse,
+  HttpStatusCode,
+} from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, switchMap, throwError } from 'rxjs';
 
 import { Car, Engine } from '../types/car';
 import { Winner } from '../types/winner';
@@ -126,16 +132,6 @@ export class RaceApiService {
       );
   }
 
-  public createWinner(winner: Winner): Observable<Winner> {
-    return this.http
-      .post<Winner>(`${apiUrl}/winners`, winner)
-      .pipe(
-        catchError((error) =>
-          throwError(() => new Error(error.message || 'Failed to create winner')),
-        ),
-      );
-  }
-
   public deleteWinner(id: number): Observable<void> {
     return this.http
       .delete<void>(`${apiUrl}/winners/${id}`)
@@ -146,13 +142,49 @@ export class RaceApiService {
       );
   }
 
-  public updateWinner(id: number, winner: Omit<Partial<Winner>, 'id'>): Observable<Winner> {
+  private updateWinner(winner: Winner): Observable<Winner> {
+    const { id, ...rest } = winner;
     return this.http
-      .put<Winner>(`${apiUrl}/winners/${id}`, winner)
+      .put<Winner>(`${apiUrl}/winners/${id}`, rest)
       .pipe(
         catchError((error) =>
           throwError(() => new Error(error.message || 'Failed to update winner')),
         ),
       );
+  }
+
+  private createWinner(winner: Winner): Observable<Winner> {
+    return this.http
+      .post<Winner>(`${apiUrl}/winners`, winner)
+      .pipe(
+        catchError((error) =>
+          throwError(() => new Error(error.message || 'Failed to create winner')),
+        ),
+      );
+  }
+
+  public upsertWinner(winnerId: number, time: number): Observable<Winner> {
+    return this.getWinner(winnerId).pipe(
+      switchMap((existing) => {
+        const updatedWinner: Winner = {
+          id: winnerId,
+          wins: existing.wins + 1,
+          time: Math.min(time, existing.time),
+        };
+        return this.updateWinner(updatedWinner);
+      }),
+      catchError((error: unknown) => {
+        if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.NotFound) {
+          const newWinner: Winner = {
+            id: winnerId,
+            wins: 1,
+            time: time,
+          };
+          return this.createWinner(newWinner);
+        }
+
+        return throwError(() => error);
+      }),
+    );
   }
 }
