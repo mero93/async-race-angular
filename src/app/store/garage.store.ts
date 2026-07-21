@@ -6,12 +6,15 @@ import { RaceApiService } from '../services/race-api.service';
 import { Car, CarState } from '../types/car';
 
 const ITEMS_PER_PAGE = 7;
+const MS_TO_SEC = 1000;
+const ROUND_SIGNIFICANCE = 2;
 
 export interface GarageState {
   cars: Car[];
   totalCount: number;
   currentPage: number;
   carStates: Record<number, CarState>;
+  isBusy: boolean;
 }
 
 const initialState: GarageState = {
@@ -19,6 +22,7 @@ const initialState: GarageState = {
   totalCount: 0,
   currentPage: 1,
   carStates: {},
+  isBusy: false,
 };
 
 export const GarageStore = signalStore(
@@ -174,6 +178,75 @@ export const GarageStore = signalStore(
         store.updateCarState(id, { status: nextStatus });
 
         return null;
+      }
+    },
+  })),
+
+  withMethods((store) => ({
+    async resetAll() {
+      patchState(store, { isBusy: true });
+      try {
+        const currentCars = store.cars();
+
+        await Promise.all(
+          currentCars.map(async (car) => {
+            const state = store.getCarStateOrDefault(car.id);
+
+            if (state.status === 'stopped') {
+              if (state.currentPosition !== 0 || state.duration !== 0) {
+                store.updateCarState(car.id, {
+                  currentPosition: 0,
+                  startTime: null,
+                  duration: 0,
+                });
+              }
+            } else {
+              await store.stopEngine(car.id);
+            }
+          }),
+        );
+      } finally {
+        patchState(store, { isBusy: false });
+      }
+    },
+  })),
+
+  withMethods((store) => ({
+    async startRace(): Promise<Car | null> {
+      if (!store.isPristine()) {
+        await store.resetAll();
+      }
+
+      patchState(store, { isBusy: true });
+      try {
+        const currentCars = store.cars();
+
+        let winnerCar: Car | null = null;
+        let winnerTime = Infinity;
+
+        const enginePromises = currentCars.map(async (car) => {
+          const startTime = performance.now();
+          const result = await store.startEngine(car.id);
+
+          if (result) {
+            const duration = (performance.now() - startTime) / MS_TO_SEC;
+            if (duration < winnerTime) {
+              winnerTime = duration;
+              winnerCar = car;
+            }
+          }
+        });
+
+        await Promise.all(enginePromises);
+
+        if (winnerCar) {
+          const finalTime = +winnerTime.toFixed(ROUND_SIGNIFICANCE);
+          await store.registerWinner(winnerCar, finalTime);
+        }
+
+        return winnerCar;
+      } finally {
+        patchState(store, { isBusy: false });
       }
     },
   })),
