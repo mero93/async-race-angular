@@ -1,1 +1,9 @@
-<router-outlet></router-outlet>
+<div class="flex min-h-screen flex-col bg-background text-foreground">
+  <app-header class="shrink-0" />
+
+  <main class="container mx-auto w-full flex-1 p-4">
+    <router-outlet />
+  </main>
+
+  <app-footer class="shrink-0" />
+</div>

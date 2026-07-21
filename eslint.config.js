@@ -9,6 +9,14 @@ const simpleImportSort = require('eslint-plugin-simple-import-sort');
 
 module.exports = defineConfig([
   {
+    settings: {
+      'better-tailwindcss': {
+        entryPoint: './src/styles.css',
+        detectComponentClasses: true,
+      },
+    },
+  },
+  {
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
