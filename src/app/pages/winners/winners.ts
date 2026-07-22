@@ -6,4 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './winners.html',
   styleUrl: './winners.css',
 })
-export class Winners {}
+export default class Winners {}

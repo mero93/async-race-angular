@@ -6,4 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './garage.html',
   styleUrl: './garage.css',
 })
-export class Garage {}
+export default class Garage {}
