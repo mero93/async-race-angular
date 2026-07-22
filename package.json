@@ -22,10 +22,15 @@
     "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
+    "@lucide/angular": "^1.25.0",
+    "@ng-icons/core": "^33.4.0",
+    "@ng-icons/lucide": "^33.4.0",
     "@ngrx/signals": "^21.1.1",
     "@spartan-ng/brain": "^1.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "rxjs": "~7.8.0",
-    "tailwind-merge": "^3.5.0",
+    "tailwind-merge": "^3.6.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
