@@ -1,0 +1,72 @@
+<form [formRoot]="carForm" (submit)="onSubmit()" class="p-4">
+  <hlm-field-group class="grid! w-full grid-cols-1 gap-4 min-[600px]:grid-cols-2">
+    <hlm-field class="flex flex-col">
+      <label for="name" hlmFieldLabel>Car Name</label>
+      <input
+        id="name"
+        hlmInput
+        type="text"
+        [formField]="carForm.name"
+        placeholder="e.g. Porsche 911 GT3"
+      />
+      @for (error of carForm.name().errors(); track error) {
+        <hlm-field-error>{{ error.message }}</hlm-field-error>
+      }
+    </hlm-field>
+
+    <hlm-field class="flex flex-col">
+      <label for="color" hlmFieldLabel>Car Color</label>
+      <div class="flex items-center gap-2">
+        <div
+          class="relative flex h-9 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-border shadow-xs transition-colors"
+          [style.backgroundColor]="carForm.color().value()"
+        >
+          <input
+            type="color"
+            [formField]="carForm.color"
+            id="color"
+            class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          />
+        </div>
+        <span class="font-mono text-xs text-muted-foreground uppercase">
+          {{ carForm.color().value() }}
+        </span>
+      </div>
+      @for (error of carForm.color().errors(); track error) {
+        <hlm-field-error>{{ error.message }}</hlm-field-error>
+      }
+    </hlm-field>
+
+    <hlm-field class="flex flex-col min-[600px]:col-span-2">
+      <label for="driving-switch" hlmFieldLabel>Test Engine</label>
+      <div class="flex h-9 items-center gap-2">
+        <hlm-switch id="driving-switch" [formField]="carForm.isDriving" />
+        <span class="text-xs text-muted-foreground">
+          {{ carForm.isDriving().value() ? 'Driving' : 'Stopped' }}
+        </span>
+      </div>
+    </hlm-field>
+
+    <div
+      class="flex flex-col items-center justify-center rounded-xl border border-border bg-muted/30 p-6 shadow-inner min-[600px]:col-span-2"
+    >
+      <app-car-view
+        class="w-full max-w-xs"
+        [car]="previewCar()"
+        [driving]="carForm.isDriving().value()"
+      />
+      <span class="mt-2 text-sm font-medium text-foreground">
+        {{ carForm.name().value() || 'Car Preview' }}
+      </span>
+    </div>
+
+    <button
+      hlmBtn
+      type="submit"
+      [disabled]="!carForm().dirty() || !carForm().valid()"
+      class="w-full min-[600px]:col-span-2"
+    >
+      Save Car
+    </button>
+  </hlm-field-group>
+</form>
