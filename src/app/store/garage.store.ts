@@ -256,4 +256,18 @@ export const GarageStore = signalStore(
       }
     },
   })),
+
+  withMethods((store, api = inject(RaceApiService)) => ({
+    async generateRandomCars(count = 100) {
+      patchState(store, { isBusy: true });
+      try {
+        await api.generateRandomCars(count);
+        await store.loadCars(store.currentPage());
+      } catch (err) {
+        console.error('Failed to generate random cars', err);
+      } finally {
+        patchState(store, { isBusy: false });
+      }
+    },
+  })),
 );

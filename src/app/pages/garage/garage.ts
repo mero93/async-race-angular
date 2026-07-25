@@ -28,4 +28,9 @@ export default class Garage {
     console.log(this.store.cars());
     closeDialog();
   }
+
+  async handleGenerateCars() {
+    await this.store.generateRandomCars();
+    console.log(this.store.cars());
+  }
 }

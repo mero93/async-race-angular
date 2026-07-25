@@ -6,18 +6,28 @@ import {
   HttpStatusCode,
 } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, switchMap, throwError } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable, switchMap, throwError } from 'rxjs';
 
+import carNamesData from '../../assets/data/car-names.json';
 import { Car, Engine } from '../types/car';
 import { Winner } from '../types/winner';
 
 const apiUrl = 'http://127.0.0.1:3000';
+
+const MAX_HEX_COLOR_VALUE = 0xffffff;
+const HEX_BASE = 16;
+const HEX_COLOR_STRING_LENGTH = 6;
+const MAX_CRYPTO_VALUE = 0x100000000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class RaceApiService {
   private readonly http = inject(HttpClient);
+
+  constructor() {
+    console.log(carNamesData);
+  }
 
   public getCars(page: number, limit = 7): Observable<{ items: Car[]; totalCount: number }> {
     const params = new HttpParams().set('_page', page.toString()).set('_limit', limit.toString());
@@ -186,5 +196,42 @@ export class RaceApiService {
         return throwError(() => error);
       }),
     );
+  }
+
+  private getRandomFloat(): number {
+    const buffer = new Uint32Array(1);
+    crypto.getRandomValues(buffer);
+    return buffer[0] / MAX_CRYPTO_VALUE;
+  }
+
+  private getRandomColor(): string {
+    return (
+      '#' +
+      Math.floor(this.getRandomFloat() * MAX_HEX_COLOR_VALUE)
+        .toString(HEX_BASE)
+        .padStart(HEX_COLOR_STRING_LENGTH, '0')
+    );
+  }
+
+  private getRandomArrayItem(arr: string[]): string {
+    return arr[Math.floor(this.getRandomFloat() * arr.length)];
+  }
+
+  private generateRandomCarName(): string {
+    const brand = this.getRandomArrayItem(carNamesData['car-manufacturers']);
+    const model = this.getRandomArrayItem(carNamesData['car-models']);
+
+    return `${brand} ${model}`;
+  }
+
+  public async generateRandomCars(count = 100): Promise<Car[]> {
+    const requests = Array.from({ length: count }, () => {
+      const name = this.generateRandomCarName();
+      const color = this.getRandomColor();
+
+      return firstValueFrom(this.createCar({ name, color }));
+    });
+
+    return Promise.all(requests);
   }
 }
