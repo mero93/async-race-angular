@@ -48,11 +48,12 @@ export class CarForm {
     color: this.carForm.color().value() || '#000000',
   }));
 
-  readonly save = output<Pick<Car, 'color' | 'name'>>();
+  readonly save = output<Pick<Car, 'name' | 'color'>>();
+  readonly isBusy = input<boolean>(false);
 
   protected onSubmit(): void {
     submit(this.carForm, async () => {
-      if (!this.carForm().dirty() || !this.carForm().valid()) return;
+      if (!this.carForm().dirty() || !this.carForm().valid() || this.isBusy()) return;
 
       const { name, color } = this.carModel();
 

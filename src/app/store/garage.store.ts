@@ -95,15 +95,19 @@ export const GarageStore = signalStore(
 
   withMethods((store, api = inject(RaceApiService)) => ({
     async createNewCar(name: string, color: string) {
+      patchState(store, { isBusy: true });
       try {
         await firstValueFrom(api.createCar({ name, color }));
         await store.loadCars(store.currentPage());
       } catch (err) {
         console.error('Failed to create car', err);
+      } finally {
+        patchState(store, { isBusy: false });
       }
     },
 
     async updateExistingCar(id: number, name: string, color: string) {
+      patchState(store, { isBusy: true });
       try {
         const updatedCar = await firstValueFrom(api.updateCar(id, { name, color }));
         patchState(store, (state) => ({
@@ -111,6 +115,8 @@ export const GarageStore = signalStore(
         }));
       } catch (err) {
         console.error('Failed to update car', err);
+      } finally {
+        patchState(store, { isBusy: false });
       }
     },
 

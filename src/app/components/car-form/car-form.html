@@ -1,6 +1,8 @@
 <form [formRoot]="carForm" (submit)="onSubmit()" class="p-4">
-  <hlm-field-group class="grid! w-full grid-cols-1 gap-4 min-[600px]:grid-cols-2">
-    <hlm-field class="flex flex-col">
+  <hlm-field-group
+    class="grid! w-full grid-cols-1 justify-items-center gap-4 min-[600px]:grid-cols-2"
+  >
+    <hlm-field class="flex w-full max-w-sm flex-col">
       <label for="name" hlmFieldLabel>Car Name</label>
       <input
         id="name"
@@ -14,7 +16,7 @@
       }
     </hlm-field>
 
-    <hlm-field class="flex flex-col">
+    <hlm-field class="flex w-full max-w-sm flex-col">
       <label for="color" hlmFieldLabel>Car Color</label>
       <div class="flex items-center gap-2">
         <div
@@ -37,7 +39,7 @@
       }
     </hlm-field>
 
-    <hlm-field class="flex flex-col min-[600px]:col-span-2">
+    <hlm-field class="flex w-full max-w-sm flex-col min-[600px]:col-span-2">
       <label for="driving-switch" hlmFieldLabel>Test Engine</label>
       <div class="flex h-9 items-center gap-2">
         <hlm-switch id="driving-switch" [formField]="carForm.isDriving" />
@@ -48,7 +50,7 @@
     </hlm-field>
 
     <div
-      class="flex flex-col items-center justify-center rounded-xl border border-border bg-muted/30 p-6 shadow-inner min-[600px]:col-span-2"
+      class="flex w-full max-w-md flex-col items-center justify-center rounded-xl border border-border bg-muted/30 p-6 shadow-inner min-[600px]:col-span-2"
     >
       <app-car-view
         class="w-full max-w-xs"
@@ -63,8 +65,8 @@
     <button
       hlmBtn
       type="submit"
-      [disabled]="!carForm().dirty() || !carForm().valid()"
-      class="w-full min-[600px]:col-span-2"
+      [disabled]="!carForm().dirty() || !carForm().valid() || isBusy()"
+      class="w-full max-w-md min-[600px]:col-span-2"
     >
       Save Car
     </button>

@@ -2,17 +2,34 @@
   <div
     class="inset-2 flex min-w-full items-center justify-start gap-4 rounded-2xl border-2 bg-accent p-2"
   >
-    <button
-      hlmBtn
-      variant="outline"
-      class="group flex shrink-0 items-center gap-2 border-2 border-b-emerald-600 text-emerald-800 transition-colors duration-500 hover:border-emerald-700 hover:text-emerald-900"
-    >
-      <span class="hidden font-extrabold min-[600px]:inline">New Car</span>
-      <svg
-        lucideCirclePlus
-        class="h-5 w-5 stroke-3 transition-all duration-400 ease-out group-hover:scale-110"
-      ></svg>
-    </button>
+    <hlm-dialog>
+      <button
+        hlmDialogTrigger
+        hlmBtn
+        variant="outline"
+        class="group flex shrink-0 items-center gap-2 border-2 border-b-emerald-600 text-emerald-800 transition-colors duration-500 hover:border-emerald-700 hover:text-emerald-900"
+      >
+        <span class="hidden font-extrabold min-[600px]:inline">New Car</span>
+        <svg
+          lucideCirclePlus
+          class="h-5 w-5 stroke-3 transition-all duration-400 ease-out group-hover:scale-110"
+        ></svg>
+      </button>
+
+      <hlm-dialog-content *hlmDialogPortal="let ctx" class="w-[95vw] max-w-[800px]! p-4 sm:p-6">
+        <hlm-dialog-header>
+          <h3 hlmDialogTitle class="text-lg font-bold sm:text-xl">Create New Car</h3>
+        </hlm-dialog-header>
+
+        <div class="mt-4 max-h-[80vh] w-full overflow-y-auto">
+          <app-car-form
+            [isBusy]="store.isBusy()"
+            (save)="handleCreateCar($event, ctx.close)"
+          ></app-car-form>
+        </div>
+      </hlm-dialog-content>
+    </hlm-dialog>
+
     <button
       hlmBtn
       variant="outline"
@@ -48,6 +65,4 @@
       ></svg>
     </button>
   </div>
-
-  <app-car-form></app-car-form>
 </div>
