@@ -1,9 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideCirclePlus, LucideCog, LucideFlag, LucideRotateCcw } from '@lucide/angular';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 
 import { CarForm } from '../../components/car-form/car-form';
+import { CarTrackList } from '../../components/car-track-list/car-track-list';
 import { GarageStore } from '../../store/garage.store';
 import { Car } from '../../types/car';
 
@@ -17,11 +19,35 @@ import { Car } from '../../types/car';
     LucideFlag,
     LucideRotateCcw,
     CarForm,
+    CarTrackList,
   ],
   templateUrl: './garage.html',
 })
-export default class Garage {
+export default class Garage implements OnInit {
   readonly store = inject(GarageStore);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      const pageParam = params['page'];
+
+      if (!pageParam) {
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { page: 1 },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+        return;
+      }
+
+      const pageNumber = Number(pageParam);
+      const validPage = Number.isNaN(pageNumber) || pageNumber < 1 ? 1 : pageNumber;
+
+      this.store.loadCars(validPage);
+    });
+  }
 
   async handleCreateCar(data: Pick<Car, 'name' | 'color'>, closeDialog: () => void) {
     await this.store.createNewCar(data.name, data.color);
@@ -32,5 +58,13 @@ export default class Garage {
   async handleGenerateCars() {
     await this.store.generateRandomCars();
     console.log(this.store.cars());
+  }
+
+  handlePageChange(newPage: number) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: newPage },
+      queryParamsHandling: 'merge',
+    });
   }
 }

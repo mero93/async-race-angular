@@ -1,4 +1,4 @@
-<div class="m-2 flex min-w-full flex-col items-start justify-center p-2 md:m-5 md:p-5">
+<div class="m-2 flex min-w-full flex-col items-start justify-center gap-5 p-2 md:m-5 md:p-5">
   <h1>Your Garage</h1>
   <div
     class="inset-2 flex min-w-full items-center justify-start gap-4 rounded-2xl border-2 bg-accent p-2"
@@ -67,4 +67,6 @@
       ></svg>
     </button>
   </div>
+
+  <app-car-track-list [store]="store" (pageChange)="handlePageChange($event)"></app-car-track-list>
 </div>

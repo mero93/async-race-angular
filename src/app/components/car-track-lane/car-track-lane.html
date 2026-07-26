@@ -1,0 +1,83 @@
+<div class="flex w-full flex-col gap-2 rounded-xl border bg-card p-3 shadow-sm sm:p-4">
+  <div class="flex w-full items-center gap-3 border-b pb-2">
+    <div class="grid shrink-0 grid-cols-2 gap-1">
+      <button
+        hlmBtn
+        variant="outline"
+        size="icon"
+        [disabled]="isBusy()"
+        (click)="editCar.emit(car())"
+        class="h-7 w-7"
+        title="Edit Car"
+      >
+        <svg lucidePencil class="h-3.5 w-3.5"></svg>
+      </button>
+
+      <button
+        hlmBtn
+        variant="destructive"
+        size="icon"
+        [disabled]="isBusy()"
+        (click)="removeCar.emit(car().id)"
+        class="h-7 w-7"
+        title="Remove Car"
+      >
+        <svg lucideTrash2 class="h-3.5 w-3.5"></svg>
+      </button>
+
+      <button
+        hlmBtn
+        variant="secondary"
+        size="icon"
+        [disabled]="isBusy() || isEngineStarted()"
+        (click)="startEngine.emit(car().id)"
+        class="h-7 w-7 bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+        title="Start Engine"
+      >
+        <svg lucidePlay class="h-3.5 w-3.5 fill-current"></svg>
+      </button>
+
+      <button
+        hlmBtn
+        variant="secondary"
+        size="icon"
+        [disabled]="isBusy() || isEngineStopped()"
+        (click)="stopEngine.emit(car().id)"
+        class="h-7 w-7 bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50"
+        title="Stop Engine"
+      >
+        <svg lucideSquare class="h-3.5 w-3.5 fill-current"></svg>
+      </button>
+    </div>
+    <div class="relative flex w-full items-center overflow-hidden rounded-lg bg-muted px-4 py-4">
+      <div
+        class="absolute top-0 bottom-0 left-45 z-0 flex h-full w-auto items-center justify-start border-l-2 border-dashed border-emerald-700/80"
+      >
+        <span
+          class="flex h-full rotate-180 items-center justify-center text-xl font-extrabold tracking-widest text-emerald-700 uppercase select-none [writing-mode:vertical-lr]"
+        >
+          Start
+        </span>
+      </div>
+      <div
+        class="absolute top-0 right-45 bottom-0 z-0 flex h-full w-auto items-center justify-end border-r-2 border-dashed border-rose-500/50"
+      >
+        <span
+          class="flex h-full rotate-180 items-center justify-center text-xl font-extrabold tracking-widest text-rose-600 uppercase select-none [writing-mode:vertical-lr]"
+        >
+          Finish
+        </span>
+      </div>
+      <div
+        class="relative z-10 flex h-full items-center transition-all duration-300"
+        [style.transform]="'translateX(' + carState().currentPosition + 'px)'"
+      >
+        <app-car-view
+          [car]="car()"
+          [carState]="carState()"
+          class="flex w-40! shrink-0 -scale-x-100 items-center justify-center"
+        />
+      </div>
+    </div>
+  </div>
+</div>
