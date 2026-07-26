@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideCirclePlus, LucideCog, LucideFlag, LucideRotateCcw } from '@lucide/angular';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -23,7 +23,7 @@ import { Car } from '../../types/car';
   ],
   templateUrl: './garage.html',
 })
-export default class Garage implements OnInit {
+export default class Garage implements OnInit, OnDestroy {
   readonly store = inject(GarageStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -49,6 +49,10 @@ export default class Garage implements OnInit {
 
       this.store.loadCars(validPage);
     });
+  }
+
+  ngOnDestroy() {
+    this.store.snapshotActiveCars();
   }
 
   handleOpenCreateModal(dialog: HlmDialog) {

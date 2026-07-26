@@ -23,7 +23,7 @@ export class CarView {
     }
 
     const status = this.carState()?.status;
-    return status === 'driving' || status === 'started';
+    return status === 'driving';
   });
 
   readonly carColor = computed(() => this.car().color || '#ef4444');

@@ -18,6 +18,7 @@ const MAX_HEX_COLOR_VALUE = 0xffffff;
 const HEX_BASE = 16;
 const HEX_COLOR_STRING_LENGTH = 6;
 const MAX_CRYPTO_VALUE = 0x100000000;
+const GARAGE_PAGE_SIZE = 7;
 
 @Injectable({
   providedIn: 'root',
@@ -25,11 +26,10 @@ const MAX_CRYPTO_VALUE = 0x100000000;
 export class RaceApiService {
   private readonly http = inject(HttpClient);
 
-  constructor() {
-    console.log(carNamesData);
-  }
-
-  public getCars(page: number, limit = 7): Observable<{ items: Car[]; totalCount: number }> {
+  public getCars(
+    page: number,
+    limit = GARAGE_PAGE_SIZE,
+  ): Observable<{ items: Car[]; totalCount: number }> {
     const params = new HttpParams().set('_page', page.toString()).set('_limit', limit.toString());
 
     return this.http.get<Car[]>(`${apiUrl}/garage`, { params, observe: 'response' }).pipe(
@@ -93,16 +93,12 @@ export class RaceApiService {
       );
   }
 
-  public driveMode(id: number): Observable<boolean> {
+  public driveMode(id: number): Observable<{ success: boolean }> {
     const params = new HttpParams().set('id', id.toString()).set('status', 'drive');
 
     return this.http
-      .patch<boolean>(`${apiUrl}/engine`, null, { params })
-      .pipe(
-        catchError((error) =>
-          throwError(() => new Error(error.message || 'Engine failed during drive')),
-        ),
-      );
+      .patch<{ success: boolean }>(`${apiUrl}/engine`, null, { params })
+      .pipe(catchError((error) => throwError(() => error)));
   }
 
   public getWinners(

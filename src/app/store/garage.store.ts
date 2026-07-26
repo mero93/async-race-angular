@@ -8,6 +8,13 @@ import { Car, CarState } from '../types/car';
 const ITEMS_PER_PAGE = 7;
 const MS_TO_SEC = 1000;
 const ROUND_SIGNIFICANCE = 2;
+const PERCENTAGE = 100;
+
+function calculateProgress(startTime: number | null, duration: number): number {
+  if (!startTime || duration <= 0) return 0;
+  const elapsed = performance.now() - startTime;
+  return Math.min(PERCENTAGE, Math.max(0, (elapsed / duration) * PERCENTAGE));
+}
 
 export interface GarageState {
   cars: Car[];
@@ -171,6 +178,7 @@ export const GarageStore = signalStore(
     },
   })),
 
+  // Individual Engine Controls
   withMethods((store, api = inject(RaceApiService)) => ({
     async stopEngine(id: number) {
       try {
@@ -186,12 +194,19 @@ export const GarageStore = signalStore(
         });
       }
     },
+  })),
 
+  withMethods((store, api = inject(RaceApiService)) => ({
     async startEngine(id: number) {
-      store.updateCarState(id, { status: 'started' });
+      store.updateCarState(id, {
+        status: 'started',
+        currentPosition: 0,
+        duration: 0,
+      });
+
       try {
         const data = await firstValueFrom(api.startStopEngine(id, 'started'));
-        const duration = data.distance / data.velocity;
+        const duration = Math.round(data.distance / data.velocity);
 
         store.updateCarState(id, {
           status: 'driving',
@@ -200,13 +215,73 @@ export const GarageStore = signalStore(
         });
 
         await firstValueFrom(api.driveMode(id));
-        return data;
+
+        if (store.getCarStateOrDefault(id).status === 'stopped') {
+          return null;
+        }
+
+        store.updateCarState(id, {
+          status: 'stopped',
+          currentPosition: PERCENTAGE,
+        });
+
+        return { ...data, duration };
       } catch {
-        const currentStatus = store.getCarStateOrDefault(id).status;
-        const nextStatus = currentStatus === 'driving' ? 'broken' : 'stopped';
-        store.updateCarState(id, { status: nextStatus });
+        const state = store.getCarStateOrDefault(id);
+
+        if (state.status !== 'stopped') {
+          const breakPosition = calculateProgress(state.startTime, state.duration);
+
+          store.updateCarState(id, {
+            status: 'broken',
+            currentPosition: breakPosition,
+          });
+        }
 
         return null;
+      }
+    },
+  })),
+
+  withMethods((store) => ({
+    snapshotActiveCars() {
+      const states = store.carStates();
+      let updatedStates: Record<number, CarState> | null = null;
+
+      Object.entries(states).forEach(([idStr, state]) => {
+        if (state.status === 'driving') {
+          const id = Number(idStr);
+          const progress = calculateProgress(state.startTime, state.duration);
+
+          updatedStates ??= { ...states };
+          updatedStates[id] = { ...state, currentPosition: progress };
+        }
+      });
+
+      if (updatedStates) {
+        patchState(store, { carStates: updatedStates });
+      }
+    },
+
+    syncCarStatesOnReentry() {
+      const states = store.carStates();
+      let updatedStates: Record<number, CarState> | null = null;
+
+      Object.entries(states).forEach(([idStr, state]) => {
+        if (state.status === 'driving') {
+          const id = Number(idStr);
+          const progress = calculateProgress(state.startTime, state.duration);
+
+          updatedStates ??= { ...states };
+          updatedStates[id] = {
+            ...state,
+            currentPosition: progress,
+          };
+        }
+      });
+
+      if (updatedStates) {
+        patchState(store, { carStates: updatedStates });
       }
     },
   })),
@@ -250,17 +325,18 @@ export const GarageStore = signalStore(
       try {
         const currentCars = store.cars();
 
+        if (currentCars.length === 0) return null;
+
         let winnerCar: Car | null = null;
         let winnerTime = Infinity;
 
         const enginePromises = currentCars.map(async (car) => {
-          const startTime = performance.now();
           const result = await store.startEngine(car.id);
 
           if (result) {
-            const duration = (performance.now() - startTime) / MS_TO_SEC;
-            if (duration < winnerTime) {
-              winnerTime = duration;
+            const timeInSec = +(result.duration / MS_TO_SEC).toFixed(ROUND_SIGNIFICANCE);
+            if (timeInSec < winnerTime) {
+              winnerTime = timeInSec;
               winnerCar = car;
             }
           }
@@ -269,8 +345,7 @@ export const GarageStore = signalStore(
         await Promise.all(enginePromises);
 
         if (winnerCar) {
-          const finalTime = +winnerTime.toFixed(ROUND_SIGNIFICANCE);
-          await store.registerWinner(winnerCar, finalTime);
+          await store.registerWinner(winnerCar, winnerTime);
         }
 
         return winnerCar;
