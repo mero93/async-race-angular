@@ -1,13 +1,15 @@
 <div class="m-2 flex min-w-full flex-col items-start justify-center gap-5 p-2 md:m-5 md:p-5">
-  <h1>Your Garage</h1>
+  <h1>Your Garage ({{ store.totalCount() }})</h1>
   <div
     class="inset-2 flex min-w-full items-center justify-start gap-4 rounded-2xl border-2 bg-accent p-2"
   >
-    <hlm-dialog>
+    <hlm-dialog #dialog>
       <button
+        #createTrigger
         hlmDialogTrigger
         hlmBtn
         variant="outline"
+        (click)="handleOpenCreateModal(dialog)"
         class="group flex shrink-0 items-center gap-2 border-2 border-b-emerald-600 text-emerald-800 transition-colors duration-500 hover:border-emerald-700 hover:text-emerald-900"
       >
         <span class="hidden font-extrabold min-[600px]:inline">New Car</span>
@@ -19,13 +21,16 @@
 
       <hlm-dialog-content *hlmDialogPortal="let ctx" class="w-[95vw] max-w-[800px]! p-4 sm:p-6">
         <hlm-dialog-header>
-          <h3 hlmDialogTitle class="text-lg font-bold sm:text-xl">Create New Car</h3>
+          <h3 hlmDialogTitle class="text-lg font-bold sm:text-xl">
+            {{ selectedCar() ? 'Edit Car' : 'Create New Car' }}
+          </h3>
         </hlm-dialog-header>
 
         <div class="mt-4 max-h-[80vh] w-full overflow-y-auto">
           <app-car-form
+            [initialData]="selectedCar()"
             [isBusy]="store.isBusy()"
-            (save)="handleCreateCar($event, ctx.close)"
+            (save)="handleSaveCar($event, ctx.close)"
           ></app-car-form>
         </div>
       </hlm-dialog-content>
@@ -68,5 +73,9 @@
     </button>
   </div>
 
-  <app-car-track-list [store]="store" (pageChange)="handlePageChange($event)"></app-car-track-list>
+  <app-car-track-list
+    [store]="store"
+    (pageChange)="handlePageChange($event)"
+    (editCar)="handleOpenEditModal($event, dialog)"
+  ></app-car-track-list>
 </div>

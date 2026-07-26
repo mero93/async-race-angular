@@ -123,7 +123,10 @@ export const GarageStore = signalStore(
 
   withMethods((store, api = inject(RaceApiService)) => ({
     async removeCar(id: number): Promise<{ wasLastOnPage: boolean }> {
-      const shouldGoPrevPage = store.cars().length === 1 && store.currentPage() > 1;
+      const currentPage = store.currentPage();
+      const currentCars = store.cars();
+      const shouldGoPrevPage = currentCars.length === 1 && currentPage > 1;
+      const hasCarsLeftOnCurrentPage = currentCars.length > 1;
 
       try {
         await firstValueFrom(api.deleteCar(id));
@@ -132,12 +135,24 @@ export const GarageStore = signalStore(
         });
 
         store.removeCarState(id);
-        patchState(store, (state) => ({
-          cars: state.cars.filter((car) => car.id !== id),
-          totalCount: Math.max(0, state.totalCount - 1),
-        }));
 
-        return { wasLastOnPage: shouldGoPrevPage };
+        if (shouldGoPrevPage) {
+          patchState(store, (state) => ({
+            totalCount: Math.max(0, state.totalCount - 1),
+          }));
+          return { wasLastOnPage: true };
+        }
+
+        if (hasCarsLeftOnCurrentPage) {
+          await store.loadCars(currentPage);
+        } else {
+          patchState(store, (state) => ({
+            cars: state.cars.filter((car) => car.id !== id),
+            totalCount: Math.max(0, state.totalCount - 1),
+          }));
+        }
+
+        return { wasLastOnPage: false };
       } catch (err) {
         console.error('Failed to remove car', err);
         return { wasLastOnPage: false };

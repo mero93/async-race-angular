@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { form, FormField, FormRoot, required, submit } from '@angular/forms/signals';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -26,14 +26,14 @@ import { CarView } from '../car-view/car-view';
   },
 })
 export class CarForm {
-  protected readonly initialData = input<Pick<Car, 'color' | 'name'>>({
-    name: '',
-    color: '#000000',
-  });
+  initialCar() {
+    throw new Error('Method not implemented.');
+  }
+  readonly initialData = input<Car | null>(null);
 
   protected readonly carModel = signal({
-    name: this.initialData().name,
-    color: this.initialData().color,
+    name: '',
+    color: '#000000',
     isDriving: false,
   });
 
@@ -45,11 +45,22 @@ export class CarForm {
   protected readonly previewCar = computed<Car>(() => ({
     id: 0,
     name: this.carForm.name().value() || 'Car Preview',
-    color: this.carForm.color().value() || '#000000',
+    color: this.carForm.color().value(),
   }));
 
-  readonly save = output<Pick<Car, 'name' | 'color'>>();
+  readonly save = output<Car>();
   readonly isBusy = input<boolean>(false);
+
+  constructor() {
+    effect(() => {
+      const data = this.initialData();
+      this.carModel.set({
+        name: data?.name ?? '',
+        color: data?.color ?? '#000000',
+        isDriving: false,
+      });
+    });
+  }
 
   protected onSubmit(): void {
     submit(this.carForm, async () => {
@@ -57,7 +68,9 @@ export class CarForm {
 
       const { name, color } = this.carModel();
 
-      this.save.emit({ name, color });
+      const existing = this.initialData();
+
+      this.save.emit({ name, color, id: existing ? existing.id : -1 });
     });
   }
 }

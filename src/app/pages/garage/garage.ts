@@ -1,8 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideCirclePlus, LucideCog, LucideFlag, LucideRotateCcw } from '@lucide/angular';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmDialogImports } from '@spartan-ng/helm/dialog';
+import { HlmDialog, HlmDialogImports } from '@spartan-ng/helm/dialog';
 
 import { CarForm } from '../../components/car-form/car-form';
 import { CarTrackList } from '../../components/car-track-list/car-track-list';
@@ -28,6 +28,8 @@ export default class Garage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  readonly selectedCar = signal<Car | null>(null);
+
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       const pageParam = params['page'];
@@ -49,10 +51,27 @@ export default class Garage implements OnInit {
     });
   }
 
-  async handleCreateCar(data: Pick<Car, 'name' | 'color'>, closeDialog: () => void) {
-    await this.store.createNewCar(data.name, data.color);
-    console.log(this.store.cars());
-    closeDialog();
+  handleOpenCreateModal(dialog: HlmDialog) {
+    this.selectedCar.set(null);
+    dialog.open();
+  }
+
+  handleOpenEditModal(car: Car, dialog: HlmDialog) {
+    this.selectedCar.set(car);
+    dialog.open();
+  }
+
+  async handleSaveCar(data: Car | Pick<Car, 'name' | 'color'>, closeDialog: () => void) {
+    try {
+      if ('id' in data && data.id !== -1) {
+        await this.store.updateExistingCar(data.id, data.name, data.color);
+      } else {
+        await this.store.createNewCar(data.name, data.color);
+      }
+      closeDialog();
+    } finally {
+      this.selectedCar.set(null);
+    }
   }
 
   async handleGenerateCars() {
