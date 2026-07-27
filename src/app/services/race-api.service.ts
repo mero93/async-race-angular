@@ -1,10 +1,4 @@
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpParams,
-  HttpResponse,
-  HttpStatusCode,
-} from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, firstValueFrom, map, Observable, switchMap, throwError } from 'rxjs';
 
@@ -179,17 +173,13 @@ export class RaceApiService {
         };
         return this.updateWinner(updatedWinner);
       }),
-      catchError((error: unknown) => {
-        if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.NotFound) {
-          const newWinner: Winner = {
-            id: winnerId,
-            wins: 1,
-            time: time,
-          };
-          return this.createWinner(newWinner);
-        }
-
-        return throwError(() => error);
+      catchError(() => {
+        const newWinner: Winner = {
+          id: winnerId,
+          wins: 1,
+          time: time,
+        };
+        return this.createWinner(newWinner);
       }),
     );
   }

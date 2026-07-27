@@ -269,25 +269,22 @@ export const GarageStore = signalStore(
     syncCarStatesOnReentry() {
       const states = store.carStates();
       let updatedStates: Record<number, CarState> | null = null;
-      const now = Date.now();
 
       Object.entries(states).forEach(([idStr, state]) => {
         if (state.status === 'driving') {
           const id = Number(idStr);
-          const elapsed = now - (state.startTime ?? 0);
-          const remainingDuration = Math.max(0, state.duration - elapsed);
           const progress = calculateProgress(state.startTime, state.duration);
 
           updatedStates ??= { ...states };
           updatedStates[id] = {
             ...state,
             currentPosition: progress,
-            duration: remainingDuration,
           };
         }
       });
 
       if (updatedStates) {
+        console.log('2. states synced:', updatedStates);
         patchState(store, { carStates: updatedStates });
       }
     },

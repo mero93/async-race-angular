@@ -72,6 +72,8 @@ export default class Garage implements OnInit, OnDestroy {
 
       this.store.loadCars(validPage);
     });
+
+    this.store.syncCarStatesOnReentry();
   }
 
   handleWinnerDialogStateChange(event: Event | string) {

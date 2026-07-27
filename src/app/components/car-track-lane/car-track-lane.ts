@@ -71,7 +71,7 @@ export class CarTrackLane {
       const percentToPx = (p: number) => (p / FINISH_LINE_PERCENT) * totalTrackPx;
 
       if (state.status === 'driving') {
-        this.runAnimation(state.currentPosition ?? 0, totalTrackPx, state.duration);
+        this.runAnimation(totalTrackPx, state.duration, state.startTime);
       } else {
         this.currentPosPx.set(percentToPx(state.currentPosition ?? 0));
       }
@@ -85,15 +85,17 @@ export class CarTrackLane {
     }
   }
 
-  private runAnimation(startPercent: number, totalTrackPx: number, duration: number): void {
-    const startPx = (startPercent / FINISH_LINE_PERCENT) * totalTrackPx;
-    let startTime: number | null = null;
+  private runAnimation(
+    totalTrackPx: number,
+    duration: number,
+    storeStartTime: number | null,
+  ): void {
+    if (!storeStartTime) return;
 
-    const animate = (now: number) => {
-      startTime ??= now;
-      const elapsed = now - startTime;
+    const animate = () => {
+      const elapsed = performance.now() - storeStartTime;
       const progressRatio = Math.min(1, Math.max(0, elapsed / duration));
-      const currentPx = startPx + progressRatio * (totalTrackPx - startPx);
+      const currentPx = progressRatio * totalTrackPx;
 
       this.currentPosPx.set(currentPx);
 
