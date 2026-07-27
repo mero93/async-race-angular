@@ -22,6 +22,7 @@ export interface GarageState {
   currentPage: number;
   carStates: Record<number, CarState>;
   isBusy: boolean;
+  raceWinner: { car: Car; time: number } | null;
 }
 
 const initialState: GarageState = {
@@ -30,6 +31,7 @@ const initialState: GarageState = {
   currentPage: 1,
   carStates: {},
   isBusy: false,
+  raceWinner: null,
 };
 
 export const GarageStore = signalStore(
@@ -259,6 +261,7 @@ export const GarageStore = signalStore(
       });
 
       if (updatedStates) {
+        console.log('snapshot taken', updatedStates);
         patchState(store, { carStates: updatedStates });
       }
     },
@@ -266,16 +269,20 @@ export const GarageStore = signalStore(
     syncCarStatesOnReentry() {
       const states = store.carStates();
       let updatedStates: Record<number, CarState> | null = null;
+      const now = Date.now();
 
       Object.entries(states).forEach(([idStr, state]) => {
         if (state.status === 'driving') {
           const id = Number(idStr);
+          const elapsed = now - (state.startTime ?? 0);
+          const remainingDuration = Math.max(0, state.duration - elapsed);
           const progress = calculateProgress(state.startTime, state.duration);
 
           updatedStates ??= { ...states };
           updatedStates[id] = {
             ...state,
             currentPosition: progress,
+            duration: remainingDuration,
           };
         }
       });
@@ -313,42 +320,50 @@ export const GarageStore = signalStore(
         patchState(store, { isBusy: false });
       }
     },
+
+    clearWinner() {
+      patchState(store, { raceWinner: null });
+    },
+
+    declareWinner(car: Car, time: number): boolean {
+      if (!store.raceWinner()) {
+        patchState(store, { raceWinner: { car, time } });
+        return true;
+      }
+      return false;
+    },
   })),
 
   withMethods((store) => ({
-    async startRace(): Promise<Car | null> {
+    async startRace(): Promise<{ car: Car; time: number } | null> {
       if (!store.isPristine()) {
         await store.resetAll();
       }
 
       patchState(store, { isBusy: true });
+      store.clearWinner();
+
       try {
         const currentCars = store.cars();
-
         if (currentCars.length === 0) return null;
 
-        let winnerCar: Car | null = null;
-        let winnerTime = Infinity;
-
-        const enginePromises = currentCars.map(async (car) => {
+        const racePromises = currentCars.map(async (car) => {
           const result = await store.startEngine(car.id);
 
           if (result) {
             const timeInSec = +(result.duration / MS_TO_SEC).toFixed(ROUND_SIGNIFICANCE);
-            if (timeInSec < winnerTime) {
-              winnerTime = timeInSec;
-              winnerCar = car;
+
+            const isFirst = store.declareWinner(car, timeInSec);
+
+            if (isFirst) {
+              await store.registerWinner(car, timeInSec);
             }
           }
         });
 
-        await Promise.all(enginePromises);
+        await Promise.all(racePromises);
 
-        if (winnerCar) {
-          await store.registerWinner(winnerCar, winnerTime);
-        }
-
-        return winnerCar;
+        return store.raceWinner();
       } finally {
         patchState(store, { isBusy: false });
       }

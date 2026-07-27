@@ -1,11 +1,18 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LucideCirclePlus, LucideCog, LucideFlag, LucideRotateCcw } from '@lucide/angular';
+import {
+  LucideCirclePlus,
+  LucideCog,
+  LucideFlag,
+  LucideRotateCcw,
+  LucideTrophy,
+} from '@lucide/angular';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialog, HlmDialogImports } from '@spartan-ng/helm/dialog';
 
 import { CarForm } from '../../components/car-form/car-form';
 import { CarTrackList } from '../../components/car-track-list/car-track-list';
+import { CarView } from '../../components/car-view/car-view';
 import { GarageStore } from '../../store/garage.store';
 import { Car } from '../../types/car';
 
@@ -18,8 +25,10 @@ import { Car } from '../../types/car';
     LucideCog,
     LucideFlag,
     LucideRotateCcw,
+    LucideTrophy,
     CarForm,
     CarTrackList,
+    CarView,
   ],
   templateUrl: './garage.html',
 })
@@ -29,6 +38,20 @@ export default class Garage implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   readonly selectedCar = signal<Car | null>(null);
+  readonly winnerDialog = viewChild<HlmDialog>('winnerDialog');
+
+  readonly isWinnerDialogOpen = signal(false);
+
+  constructor() {
+    effect(() => {
+      const winner = this.store.raceWinner();
+      if (winner) {
+        this.isWinnerDialogOpen.set(true);
+      } else {
+        this.isWinnerDialogOpen.set(false);
+      }
+    });
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -49,6 +72,14 @@ export default class Garage implements OnInit, OnDestroy {
 
       this.store.loadCars(validPage);
     });
+  }
+
+  handleWinnerDialogStateChange(event: Event | string) {
+    if (typeof event === 'string') {
+      this.isWinnerDialogOpen.set(event === 'open');
+    } else {
+      this.isWinnerDialogOpen.set(false);
+    }
   }
 
   ngOnDestroy() {
@@ -80,7 +111,6 @@ export default class Garage implements OnInit, OnDestroy {
 
   async handleGenerateCars() {
     await this.store.generateRandomCars();
-    console.log(this.store.cars());
   }
 
   handlePageChange(newPage: number) {
@@ -89,5 +119,13 @@ export default class Garage implements OnInit, OnDestroy {
       queryParams: { page: newPage },
       queryParamsHandling: 'merge',
     });
+  }
+
+  handleStartRace() {
+    this.store.startRace();
+  }
+
+  async handleResetRace() {
+    await this.store.resetAll();
   }
 }
