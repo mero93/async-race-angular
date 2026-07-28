@@ -120,11 +120,14 @@ export const GarageStore = signalStore(
         patchState(store, { isBusy: false });
       }
     },
+  })),
 
+  withMethods((store, api = inject(RaceApiService), events = inject(RaceEventsService)) => ({
     async updateExistingCar(id: number, name: string, color: string) {
       patchState(store, { isBusy: true });
       try {
         const updatedCar = await firstValueFrom(api.updateCar(id, { name, color }));
+        events.notifyUpdateRequest();
         patchState(store, (state) => ({
           cars: state.cars.map((car) => (car.id === id ? updatedCar : car)),
         }));
@@ -147,7 +150,7 @@ export const GarageStore = signalStore(
       try {
         await firstValueFrom(api.deleteCar(id));
         await firstValueFrom(api.deleteWinner(id))
-          .then(() => events.notifyWinnerRegistered())
+          .then(() => events.notifyUpdateRequest())
           .catch(() => {
             /* empty */
           });
@@ -184,7 +187,7 @@ export const GarageStore = signalStore(
     async registerWinner(winnerCar: Car, timeInSeconds: number) {
       try {
         const result = await firstValueFrom(api.upsertWinner(winnerCar.id, timeInSeconds));
-        events.notifyWinnerRegistered();
+        events.notifyUpdateRequest();
         return result;
       } catch (err) {
         console.error(`Failed to register winner record for car ${winnerCar.id}`, err);

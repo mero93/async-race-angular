@@ -41,7 +41,7 @@
         hlmBtn
         variant="secondary"
         size="icon"
-        [disabled]="isBusy() || !canStopEngine()"
+        [disabled]="!canStopEngine()"
         (click)="onStopEngine()"
         class="h-7 w-7 bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50"
         title="Stop Engine"

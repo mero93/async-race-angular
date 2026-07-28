@@ -48,11 +48,12 @@ export class CarTrackLane {
   protected readonly canStopEngine = computed(() => {
     const state = this.carState();
     const pos = state.currentPosition ?? 0;
+
     return (
       state.status === 'driving' ||
       state.status === 'started' ||
       state.status === 'broken' ||
-      pos >= FINISH_LINE_PERCENT
+      pos > 0
     );
   });
 

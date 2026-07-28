@@ -6,7 +6,7 @@ export class RaceEventsService {
   private readonly winnerRegisteredSubject = new Subject<void>();
   readonly winnerRegistered$ = this.winnerRegisteredSubject.asObservable();
 
-  notifyWinnerRegistered(): void {
+  notifyUpdateRequest(): void {
     this.winnerRegisteredSubject.next();
   }
 }
