@@ -85,18 +85,21 @@
   </div>
 
   <div class="flex w-full flex-col gap-4">
-    @if (store.isLoading()) {
-      <div class="py-12 text-center text-gray-400">Loading cars...</div>
-    } @else {
-      <app-pagination
-        [currentPage]="store.currentPage()"
-        [totalPages]="store.totalPages()"
-        [disabled]="store.isBusy()"
-        (pageChange)="handlePageChange($event)"
-      >
-        <div class="flex flex-col gap-4">
-          @for (car of store.cars(); track car.id) {
+    <app-pagination
+      [currentPage]="store.currentPage()"
+      [totalPages]="store.totalPages()"
+      [disabled]="store.isBusy() || store.isLoading()"
+      (pageChange)="handlePageChange($event)"
+    >
+      <div class="flex flex-col gap-4">
+        @if (store.isLoading()) {
+          @for (_ of skeletonItems; track $index) {
+            <app-car-track-lane-skeleton [height]="laneHeightPx()" />
+          }
+        } @else {
+          @for (car of store.cars(); track car.id; let first = $first) {
             <app-car-track-lane
+              #firstLane
               [car]="car"
               [isBusy]="store.isBusy()"
               [carState]="store.getCarStateOrDefault(car.id)"
@@ -110,9 +113,9 @@
               No cars found. Add one above or generate random cars!
             </div>
           }
-        </div>
-      </app-pagination>
-    }
+        }
+      </div>
+    </app-pagination>
   </div>
 
   <hlm-dialog
