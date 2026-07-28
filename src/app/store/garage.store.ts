@@ -23,6 +23,7 @@ export interface GarageState {
   currentPage: number;
   carStates: Record<number, CarState>;
   isBusy: boolean;
+  isLoading: boolean;
   raceWinner: { car: Car; time: number } | null;
 }
 
@@ -32,6 +33,7 @@ const initialState: GarageState = {
   currentPage: 1,
   carStates: {},
   isBusy: false,
+  isLoading: false,
   raceWinner: null,
 };
 
@@ -56,6 +58,7 @@ export const GarageStore = signalStore(
 
   withMethods((store, api = inject(RaceApiService)) => ({
     async loadCars(page: number) {
+      patchState(store, { isLoading: true });
       try {
         const data = await firstValueFrom(api.getCars(page));
         patchState(store, {
@@ -65,6 +68,8 @@ export const GarageStore = signalStore(
         });
       } catch (err) {
         console.error('Failed to load cars', err);
+      } finally {
+        patchState(store, { isLoading: false });
       }
     },
   })),
@@ -131,8 +136,9 @@ export const GarageStore = signalStore(
     },
   })),
 
-  withMethods((store, api = inject(RaceApiService)) => ({
+  withMethods((store, api = inject(RaceApiService), events = inject(RaceEventsService)) => ({
     async removeCar(id: number): Promise<{ wasLastOnPage: boolean }> {
+      patchState(store, { isBusy: true });
       const currentPage = store.currentPage();
       const currentCars = store.cars();
       const shouldGoPrevPage = currentCars.length === 1 && currentPage > 1;
@@ -140,9 +146,11 @@ export const GarageStore = signalStore(
 
       try {
         await firstValueFrom(api.deleteCar(id));
-        await firstValueFrom(api.deleteWinner(id)).catch(() => {
-          /* empty */
-        });
+        await firstValueFrom(api.deleteWinner(id))
+          .then(() => events.notifyWinnerRegistered())
+          .catch(() => {
+            /* empty */
+          });
 
         store.removeCarState(id);
 
@@ -166,6 +174,8 @@ export const GarageStore = signalStore(
       } catch (err) {
         console.error('Failed to remove car', err);
         return { wasLastOnPage: false };
+      } finally {
+        patchState(store, { isBusy: false });
       }
     },
   })),

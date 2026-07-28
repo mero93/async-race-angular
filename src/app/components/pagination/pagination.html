@@ -1,0 +1,55 @@
+<ng-content />
+@if (totalPages() > 1) {
+  <nav hlmPagination class="mt-6 flex justify-center">
+    <ul hlmPaginationContent class="flex items-center gap-1">
+      <li hlmPaginationItem>
+        <button
+          hlmPaginationPrevious
+          [disabled]="currentPage() <= 1 || disabled()"
+          (click)="pageChange.emit(currentPage() - 1)"
+          class="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40"
+        >
+          <svg lucideChevronLeft class="h-4 w-4"></svg>
+          <span class="sr-only">Previous page</span>
+        </button>
+      </li>
+
+      @for (item of pages(); track $index) {
+        <li hlmPaginationItem>
+          @if (item === '...') {
+            <span
+              hlmPaginationEllipse
+              class="flex h-9 w-9 items-center justify-center text-sm font-medium text-muted-foreground select-none"
+            >
+              <svg lucideEllipsis class="h-4 w-4"></svg>
+            </span>
+          } @else {
+            <button
+              hlmPaginationLink
+              [disabled]="disabled()"
+              (click)="pageChange.emit(item)"
+              class="flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              [class.bg-primary]="item === currentPage()"
+              [class.text-primary-foreground]="item === currentPage()"
+              [class.shadow-sm]="item === currentPage()"
+            >
+              {{ item }}
+            </button>
+          }
+        </li>
+      }
+
+      <li hlmPaginationItem>
+        <button
+          hlmPaginationNext
+          [disabled]="currentPage() >= totalPages() || disabled()"
+          (click)="pageChange.emit(currentPage() + 1)"
+          class="flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40"
+        >
+          <svg lucideChevronRight class="h-4 w-4"></svg>
+          <span class="sr-only">Next page</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+}

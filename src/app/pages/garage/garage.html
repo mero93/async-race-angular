@@ -1,5 +1,7 @@
 <div class="m-2 flex min-w-full flex-col items-start justify-center gap-5 p-2 md:m-5 md:p-5">
-  <h1>Your Garage ({{ store.totalCount() }})</h1>
+  <h1 class="text-3xl font-bold">
+    Your Garage <span class="text-gray-400">({{ store.totalCount() }})</span>
+  </h1>
 
   <div
     class="inset-2 flex min-w-full items-center justify-start gap-4 rounded-2xl border-2 bg-accent p-2"
@@ -82,12 +84,36 @@
     </button>
   </div>
 
-  <app-car-track-list
-    [store]="store"
-    (pageChange)="handlePageChange($event)"
-    (editCar)="handleOpenEditModal($event, dialog)"
-  >
-  </app-car-track-list>
+  <div class="flex w-full flex-col gap-4">
+    @if (store.isLoading()) {
+      <div class="py-12 text-center text-gray-400">Loading cars...</div>
+    } @else {
+      <app-pagination
+        [currentPage]="store.currentPage()"
+        [totalPages]="store.totalPages()"
+        [disabled]="store.isBusy()"
+        (pageChange)="handlePageChange($event)"
+      >
+        <div class="flex flex-col gap-4">
+          @for (car of store.cars(); track car.id) {
+            <app-car-track-lane
+              [car]="car"
+              [isBusy]="store.isBusy()"
+              [carState]="store.getCarStateOrDefault(car.id)"
+              (editCar)="handleOpenEditModal($event, dialog)"
+              (removeCar)="store.removeCar($event)"
+              (startEngine)="store.startEngine($event)"
+              (stopEngine)="store.stopEngine($event)"
+            />
+          } @empty {
+            <div class="py-12 text-center text-gray-400">
+              No cars found. Add one above or generate random cars!
+            </div>
+          }
+        </div>
+      </app-pagination>
+    }
+  </div>
 
   <hlm-dialog
     #winnerDialog

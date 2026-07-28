@@ -11,8 +11,9 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmDialog, HlmDialogImports } from '@spartan-ng/helm/dialog';
 
 import { CarForm } from '../../components/car-form/car-form';
-import { CarTrackList } from '../../components/car-track-list/car-track-list';
+import { CarTrackLane } from '../../components/car-track-lane/car-track-lane';
 import { CarView } from '../../components/car-view/car-view';
+import { Pagination } from '../../components/pagination/pagination';
 import { GarageStore } from '../../store/garage.store';
 import { Car } from '../../types/car';
 
@@ -27,8 +28,9 @@ import { Car } from '../../types/car';
     LucideRotateCcw,
     LucideTrophy,
     CarForm,
-    CarTrackList,
     CarView,
+    Pagination,
+    CarTrackLane,
   ],
   templateUrl: './garage.html',
 })
