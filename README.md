@@ -1,59 +1,116 @@
-# AsyncRaceAngular
+# Async Race (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.7.
+**Score:** 400 / 400 pts  
+**Live Deployment:** https://async-race-angular.netlify.app  
+**Repository:** https://github.com/mero93/async-race-angular
 
-## Development server
+---
 
-To start a local development server, run:
+## How To Run
 
-```bash
-ng serve
-```
+Follow these steps to run the project locally or test the live deployment.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### 1. Run the Mock API Server
 
-## Code scaffolding
+The application requires the `async-race-api` backend running locally.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+1. Clone or fork the API repository:
+   ` git clone https://github.com/mikhama/async-race-api.git`
 
-```bash
-ng generate component component-name
-```
+2. Navigate to the project and install dependencies: `npm install`
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+3. Start the mock server on port 3000:
+   `npm start`
 
-```bash
-ng generate --help
-```
+Note: Make sure the API is running at http://localhost:3000.
 
-## Building
+### 2. Run the Angular Application
 
-To build the project run:
+#### Local Development
 
-```bash
-ng build
-```
+1. Clone this repository and install dependencies:
+   git clone https://github.com/mero93/async-race-angular.git
+   cd async-race-angular
+   npm install
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+2. Start the Angular development server:
+   ng serve
 
-## Running unit tests
+3. Open your browser at http://localhost:4200.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+#### Testing Live Deployment
 
-```bash
-ng test
-```
+If you are checking the Live Deployment, keep the mock API server running locally on port 3000 so the deployed app can communicate with your local backend.
+---
 
-## Running end-to-end tests
+## 📋 Evaluation Checklist
 
-For end-to-end (e2e) testing, run:
+### 🚀 UI Deployment
 
-```bash
-ng e2e
-```
+- [x] **Deployment Platform:** Successfully deploy the UI on Netlify.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### ✅ Requirements to Commits and Repository
 
-## Additional Resources
+- [x] **Commit guidelines compliance:** Ensure that all commits follow the specified commit guidelines.
+- [x] **Checklist included in README.md:** Included in README.md.
+- [x] **Score calculation:** Included at the top of README.md.
+- [x] **UI Deployment link in README.md:** Included at the top of README.md.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
+
+### 🏛️ Basic Structure (80 points)
+
+- [x] **Two Views (10 points):** Implement two primary views: "Garage" and "Winners".
+- [x] **Garage View Content (30 points):** "Garage" view displays view name, car creation/editing panel, race control panel, and garage section.
+- [x] **Winners View Content (10 points):** "Winners" view displays view name, winners table, and pagination.
+- [x] **Persistent State (30 points):** View state remains consistent when navigating between views (page numbers, input states, etc.).
+
+---
+
+### 🏎️ Garage View (90 points)
+
+- [x] **Car Creation And Editing Panel. CRUD Operations (20 points):** Enables creating, updating, and deleting cars. Deleting a car removes it from both "garage" and "winners".
+- [x] **Color Selection (10 points):** Color selection displays the selected color on the car's image.
+- [x] **Random Car Creation (20 points):** Button generates 100 random cars with random names and colors.
+- [x] **Car Management Buttons (10 points):** Action buttons provided near each car's image.
+- [x] **Pagination (10 points):** Displays 7 cars per page.
+- [x] **EXTRA POINTS (20 points):**
+  - [x] **Empty Garage:** Friendly message displayed when garage is empty.
+  - [x] **Empty Garage Page:** Removing the last car on a page navigates automatically to the previous page.
+
+---
+
+### 🏆 Winners View (50 points)
+
+- [x] **Display Winners (15 points):** Winning cars are displayed in the "Winners view" table.
+- [x] **Pagination for Winners (10 points):** Displays 10 winners per page.
+- [x] **Winners Table (15 points):** Displays car №, image, name, wins count, and best time in seconds. Increments wins and updates best time.
+- [x] **Sorting Functionality (10 points):** Supports sorting by wins and best time in ascending/descending order.
+
+---
+
+### 🚗 Race Operations (170 points)
+
+- [x] **Start Engine Animation (20 points):** Start engine button triggers velocity request, driving request, and animates car.
+- [x] **Stop Engine Animation (20 points):** Stop engine button returns car to initial position.
+- [x] **Responsive Animation (30 points):** Animations are fluid on screens as small as 500px.
+- [x] **Start Race Button (10 points):** Starts race for all cars on current page.
+- [x] **Reset Race Button (15 points):** Returns all cars to starting positions.
+- [x] **Winner Announcement (5 points):** Displays banner announcing winning car name.
+- [x] **Button States (20 points):** Start/stop engine buttons correctly disabled/enabled based on engine state.
+- [x] **Actions during the race (50 points):** Actions during running race are handled predictably.
+
+---
+
+### 🎨 Code Quality & Setup (10 points)
+
+- [x] **Prettier Setup (5 points):** Prettier configured with `format` and `ci:format` scripts.
+- [x] **ESLint Configuration (5 points):** ESLint configured with strict TypeScript rules.
+
+---
+
+### 🌟 Overall Code Quality (100 points)
+
+- [x] **Code Quality & Architecture (100 points):** Modular architecture with clear layer separation, strict typing, no `any`, and clean functional code practices.
+
+---
