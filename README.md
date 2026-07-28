@@ -75,8 +75,8 @@ If you are checking the Live Deployment, keep the mock API server running locall
 - [x] **Car Management Buttons (10 points):** Action buttons provided near each car's image.
 - [x] **Pagination (10 points):** Displays 7 cars per page.
 - [x] **EXTRA POINTS (20 points):**
-  - [x] **Empty Garage:** Friendly message displayed when garage is empty.
-  - [x] **Empty Garage Page:** Removing the last car on a page navigates automatically to the previous page.
+- [x] **Empty Garage:** Friendly message displayed when garage is empty.
+- [x] **Empty Garage Page:** Removing the last car on a page navigates automatically to the previous page.
 
 ---
 

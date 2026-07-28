@@ -23,6 +23,9 @@ const WINNERS_PER_PAGE = 10;
     WinnerRowSkeleton,
   ],
   templateUrl: './winners.html',
+  host: {
+    class: 'block w-full',
+  },
 })
 export default class Winners {
   readonly store = inject(WinnersStore);

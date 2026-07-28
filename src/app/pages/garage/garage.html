@@ -1,7 +1,9 @@
-<div class="m-2 flex min-w-full flex-col items-start justify-center gap-5 p-2 md:m-5 md:p-5">
-  <h1 class="text-3xl font-bold">
-    Your Garage <span class="text-gray-400">({{ store.totalCount() }})</span>
-  </h1>
+<div class="mx-auto w-full p-4 sm:p-6">
+  <div class="mb-6 flex items-center justify-start">
+    <h1 class="text-2xl font-bold sm:text-3xl">
+      Your Garage <span class="text-muted-foreground">({{ store.totalCount() }})</span>
+    </h1>
+  </div>
 
   <div
     class="inset-2 flex min-w-full items-center justify-start gap-4 rounded-2xl border-2 bg-accent p-2"
