@@ -1,6 +1,6 @@
 [build]
     command = "npm run build"
-    publish = "dist/async-race/browser"
+    publish = "dist/async-race-angular/browser"
 
 [build.environment]
     NPM_FLAGS = "--legacy-peer-deps"
