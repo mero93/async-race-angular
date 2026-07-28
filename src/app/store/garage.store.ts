@@ -3,6 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { firstValueFrom } from 'rxjs';
 
 import { RaceApiService } from '../services/race-api.service';
+import { RaceEventsService } from '../services/race-events.service';
 import { Car, CarState } from '../types/car';
 
 const ITEMS_PER_PAGE = 7;
@@ -169,10 +170,12 @@ export const GarageStore = signalStore(
     },
   })),
 
-  withMethods((_, api = inject(RaceApiService)) => ({
+  withMethods((_, api = inject(RaceApiService), events = inject(RaceEventsService)) => ({
     async registerWinner(winnerCar: Car, timeInSeconds: number) {
       try {
-        return await firstValueFrom(api.upsertWinner(winnerCar.id, timeInSeconds));
+        const result = await firstValueFrom(api.upsertWinner(winnerCar.id, timeInSeconds));
+        events.notifyWinnerRegistered();
+        return result;
       } catch (err) {
         console.error(`Failed to register winner record for car ${winnerCar.id}`, err);
         return null;

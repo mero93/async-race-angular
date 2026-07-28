@@ -4,7 +4,7 @@ import { catchError, firstValueFrom, map, Observable, switchMap, throwError } fr
 
 import carNamesData from '../../assets/data/car-names.json';
 import { Car, Engine } from '../types/car';
-import { Winner } from '../types/winner';
+import { SortBy, SortOrder, Winner } from '../types/winner';
 
 const apiUrl = 'http://127.0.0.1:3000';
 
@@ -98,8 +98,8 @@ export class RaceApiService {
   public getWinners(
     page: number,
     limit = 10,
-    sort?: 'id' | 'wins' | 'time',
-    order?: 'ASC' | 'DESC',
+    sort?: SortBy,
+    order?: SortOrder,
   ): Observable<{ items: Winner[]; totalCount: number }> {
     let params = new HttpParams().set('_page', page.toString()).set('_limit', limit.toString());
     if (sort && order) {
